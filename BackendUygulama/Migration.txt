@@ -1,0 +1,4 @@
+dotnet add package Pomelo.EntityFrameworkCore.MySql
+dotnet add package Microsoft.EntityFrameworkCore.Design
+
+dotnet ef dbcontext scaffold "Server=localhost;Database=scrumboarddb;User=scrumboardadmin;Password=asd123;" Pomelo.EntityFrameworkCore.MySql -o Models
