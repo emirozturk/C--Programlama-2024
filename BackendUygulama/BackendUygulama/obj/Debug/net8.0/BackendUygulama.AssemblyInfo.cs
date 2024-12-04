@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BackendUygulama")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c90c42a93677039f876417f3683f0a03ef5fcce7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a28b6e2c523278e78c63f4fba69b7650f7c47b14")]
 [assembly: System.Reflection.AssemblyProductAttribute("BackendUygulama")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BackendUygulama")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

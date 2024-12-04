@@ -35,14 +35,6 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 */
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 builder.Services.AddAuthorization();
 
@@ -64,6 +56,16 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true
     };
 });
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 
 app.MapControllers();
 app.UseHttpsRedirection();
