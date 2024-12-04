@@ -1,4 +1,8 @@
+using System.Security.Claims;
+using BackendUygulama.DataAccess;
 using BackendUygulama.Models;
+using BackendUygulama.Models.ReturnModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,30 +10,46 @@ namespace BackendUygulama.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UsersController : ControllerBase
 {
+    private UserDAO userDao;
+    private IConfiguration configuration;
+
+    public UsersController(UserDAO userDAO, IConfiguration configuration)
+    {
+        this.userDao = userDAO;
+        this.configuration = configuration;
+    }
     [HttpGet]
     public ActionResult<List<User>> GetUsers()
     {
-        var result = Dummy.users;
-        var response = Response<List<User>>.Success(result);
-        return Ok(response);
+        var mail = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        bool auth = userDao.IsAuthorized(mail);
+        if (auth)
+        {
+            var result = userDao.GetUsers();
+            var response = Response<List<User>>.Success(result);
+            return Ok(response);
+        }
+        return Unauthorized("Unauthorized");
     }
 
     [HttpGet("{id}")]
-    public ActionResult<User> GetUser(int id)
+    public ActionResult<RUser> GetUser(int id)
     {
         try
         {
-            var result = Dummy.users.FirstOrDefault(x => x.Id == id);
+            User? result = userDao.GetUser(id);
             if (result != null)
             {
-                var response = Response<User>.Success(result);
+                var rUser = new RUser(result);
+                var response = Response<RUser>.Success(rUser);
                 return Ok(response);
             }
             else
             {
-                var response = Response<User>.Fail("Kullanıcı bulunamadı"); //ToDo: Mesajlar hardcode edilmeyecek
+                var response = Response<RUser>.Fail("Kullanıcı bulunamadı"); //ToDo: Mesajlar hardcode edilmeyecek
                 return NotFound(response);
             }
         }
@@ -44,9 +64,8 @@ public class UsersController : ControllerBase
     {
         try
         {
-            user.Id = 55;
-            Dummy.users.Add(user);
-            return user;
+            var newUser = userDao.Add(user);
+            return newUser;
         }
         catch (Exception e)
         {
@@ -59,16 +78,10 @@ public class UsersController : ControllerBase
         try
         {
             //ToDo: Daha kısa hali var. Sınavdan sonra değiştirilecek.
-            var result = Dummy.users.FirstOrDefault(x => x.Id==id);
-            if (result != null)
+            User? updatedUser = userDao.Update(user, id);
+            if(updatedUser != null)
             {
-                result.Id = user.Id;
-                result.Name = user.Name;
-                result.Mail = user.Mail;
-                result.Password = user.Password;
-                result.Role = user.Role;
-                
-                var response = Response<User>.Success(result);
+                var response = Response<User>.Success(updatedUser);
                 return Ok(response);
             }
             else
@@ -85,8 +98,28 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult<User> DeleteUser(int id)
     {
-        var user = Dummy.users.FirstOrDefault(x => x.Id == id);
-        Dummy.users.Remove(user);
-        return Ok(Response<User>.Success(user));
+        User? user = userDao.DeleteUser(id);
+        if (user != null)
+        {
+            return Ok(Response<User>.Success(user));
+        }
+        return BadRequest(Response<User>.Fail("Kullanıcı Bulunamadı"));
+    }
+
+    [HttpPost("checkUser")]
+    [AllowAnonymous]
+    public ActionResult<string> CheckUser(User user)
+    {
+        var result = userDao.CheckUser(user);
+        if (result != null)
+        {
+            var  stringToken =
+                Security.CreateToken(user, configuration); //Sonraki sorguların atılmasında kullanılacak token
+            return Ok(Response<UserToken>.Success(
+                new UserToken(result, stringToken)));
+
+        }
+
+        return BadRequest(Response<string>.Fail("Kullanıcı bulunamadı ya da şifre yanlış"));
     }
 }
