@@ -13,10 +13,10 @@ namespace BackendUygulama.Controller;
 [Authorize]
 public class UsersController : ControllerBase
 {
-    private UserDAO userDao;
+    private IUserDAO userDao;
     private IConfiguration configuration;
 
-    public UsersController(UserDAO userDAO, IConfiguration configuration)
+    public UsersController(IUserDAO userDAO, IConfiguration configuration)
     {
         this.userDao = userDAO;
         this.configuration = configuration;

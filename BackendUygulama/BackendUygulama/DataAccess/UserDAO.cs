@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BackendUygulama.DataAccess;
 
-public class UserDAO
+public class UserDAO : IUserDAO
 {
     ScrumboarddbContext _context;
 
@@ -16,13 +16,13 @@ public class UserDAO
     {
         return _context.Users.ToList();
     }
-
+    
     public User? GetUser(int id)
     {
         return _context.Users.FirstOrDefault(u => u.Id == id);
     }
 
-    public ActionResult<User> Add(User user)
+    public User Add(User user)
     {
         _context.Users.Add(user);
         _context.SaveChanges();
